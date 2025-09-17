@@ -1,0 +1,98 @@
+
+import type { NewsChannel, NewsArticle } from './types';
+
+export const NEWS_CHANNELS: NewsChannel[] = [
+  { id: 'pts', name: '公視' },
+  { id: 'ttv', name: '台視' },
+  { id: 'ctv', name: '中視' },
+  { id: 'cts', name: '華視' },
+  { id: 'tvbs', name: 'TVBS' },
+  { id: 'ebc', name: '東森' },
+  { id: 'ftv', name: '民視' },
+  { id: 'set', name: '三立' },
+  { id: 'gtv', name: '寰宇' },
+  { id: 'mnews', name: '鏡新聞' },
+];
+
+export const MOCK_NEWS_DATA: NewsArticle[] = [
+  {
+    id: 1,
+    channelId: 'tvbs',
+    title: '科技峰會登場，AI 成為全球焦點',
+    content: '今日在矽谷舉行的全球科技峰會，主題圍繞在人工智慧 (AI) 的未來發展。各大科技巨頭紛紛展示最新的 AI 技術與應用，預示著下一波的科技革命。專家表示，AI 將深度影響每個產業。',
+    date: '2024-07-28',
+    imageUrl: 'https://picsum.photos/seed/tech1/400/200',
+  },
+  {
+    id: 2,
+    channelId: 'set',
+    title: '立法院三讀通過「數位發展法」',
+    content: '經過數月的激烈辯論，立法院今日下午三讀通過「數位發展法」，旨在促進國內數位經濟轉型，並加強資訊安全。法案的通過引起各界廣泛討論，對於選舉後的政治版圖有何影響，值得關注。',
+    date: '2024-07-28',
+    imageUrl: 'https://picsum.photos/seed/politics1/400/200',
+  },
+  {
+    id: 3,
+    channelId: 'ftv',
+    title: '南部持續高溫，民眾慎防熱傷害',
+    content: '中央氣象局表示，受到太平洋高壓影響，南部地區本週天氣將持續炎熱，多地高溫可能突破攝氏35度。醫生提醒民眾，應多補充水分，避免長時間在戶外活動，以防熱傷害。',
+    date: '2024-07-27',
+    imageUrl: 'https://picsum.photos/seed/weather1/400/200',
+  },
+  {
+    id: 4,
+    channelId: 'ebc',
+    title: '美食展人潮爆滿，在地小吃受青睞',
+    content: '為期四天的年度美食展今日開幕，吸引大量民眾前往。其中，台灣在地小吃區人氣最旺，許多攤位大排長龍。主辦單位預計，今年參觀人數將創下新高。',
+    date: '2024-07-27',
+    imageUrl: 'https://picsum.photos/seed/food1/400/200',
+  },
+  {
+    id: 5,
+    channelId: 'pts',
+    title: '環保團體呼籲正視海洋塑膠污染問題',
+    content: '國際環保組織今日公布最新報告，指出海洋塑膠污染問題日益嚴重，對生態系統造成巨大威脅。團體呼籲政府與企業應採取更積極的減塑措施。',
+    date: '2024-07-26',
+    imageUrl: 'https://picsum.photos/seed/eco1/400/200',
+  },
+  {
+    id: 6,
+    channelId: 'ttv',
+    title: '股市再創新高，電子股領漲',
+    content: '台北股市今日在電子股，特別是 AI 相關概念股的帶領下，指數終場上漲超過200點，再創歷史新高。分析師認為，市場資金充裕，短期內仍有上攻動能。',
+    date: '2024-07-28',
+    imageUrl: 'https://picsum.photos/seed/stock1/400/200',
+  },
+  {
+    id: 7,
+    channelId: 'ctv',
+    title: '選舉將近，各黨派候選人積極拜票',
+    content: '距離年底大選不到一百天，各黨派候選人紛紛展開拜票行程，深入基層爭取選民支持。本次選舉的競爭格外激烈，尤其在幾個關鍵選區。',
+    date: '2024-07-26',
+    imageUrl: 'https://picsum.photos/seed/election1/400/200',
+  },
+  {
+    id: 8,
+    channelId: 'cts',
+    title: 'Discovery of new exoplanet with Earth-like conditions',
+    content: 'Astronomers announced the discovery of a new exoplanet, Kepler-186f, which orbits within the habitable zone of its star. This finding raises hopes for finding life beyond Earth. The technology used for this discovery is revolutionary.',
+    date: '2024-07-25',
+    imageUrl: 'https://picsum.photos/seed/space1/400/200',
+  },
+   {
+    id: 9,
+    channelId: 'gtv',
+    title: '全球供應鏈重組，台灣科技業迎來新挑戰',
+    content: '隨著地緣政治的變化，全球供應鏈正在加速重組。台灣的科技產業在其中扮演關鍵角色，但也面臨著新的挑戰與機遇。政府與企業需要共同應對。',
+    date: '2024-07-28',
+    imageUrl: 'https://picsum.photos/seed/supplychain1/400/200',
+  },
+  {
+    id: 10,
+    channelId: 'mnews',
+    title: '深度偽造技術引發擔憂，專家籲建立防範機制',
+    content: 'AI 深度偽造（Deepfake）技術的濫用日益增多，已對社會信任和國家安全構成威脅。在選舉期間，這類技術可能被用來散播不實資訊。專家呼籲，應盡快建立有效的法律和技術防範機制。',
+    date: '2024-07-27',
+    imageUrl: 'https://picsum.photos/seed/deepfake1/400/200',
+  },
+];
