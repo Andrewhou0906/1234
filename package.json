@@ -1,22 +1,14 @@
 {
   "name": "記者萬事通",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
+  "description": "一個為記者設計的強大工具，提供即時新聞聚合搜尋和影片語音轉文字稿功能，提升新聞工作效率。",
   "dependencies": {
-    "react-dom": "^19.1.1",
-    "react": "^19.1.1",
-    "@google/genai": "latest"
+    "@google/genai": "0.16.0",
+    "ytdl-core": "4.11.5"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "@types/node": "^20.11.24",
+    "@vercel/node": "^3.0.22"
   }
 }

@@ -1,38 +1,28 @@
-
 import React, { useState, useRef } from 'react';
-import { UploadIcon, LinkIcon, SpinnerIcon } from './Icons';
-import { GoogleGenAI } from '@google/genai';
+import { UploadIcon, LinkIcon, SpinnerIcon, CopyIcon } from './Icons';
 
 type InputType = 'url' | 'file';
 
-const fileToGenerativePart = async (file: File) => {
-  const base64EncodedDataPromise = new Promise<string>((resolve, reject) => {
+// Helper function to read a file and convert it to a Base64 string.
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
-        resolve(reader.result.split(',')[1]);
-      } else {
-        reject(new Error("Failed to read file as data URL"));
-      }
-    };
-    reader.onerror = (error) => reject(error);
+    reader.onload = () => resolve((reader.result as string).split(',')[1]);
+    reader.onerror = error => reject(error);
     reader.readAsDataURL(file);
   });
-  const data = await base64EncodedDataPromise;
-  return {
-    inlineData: { data, mimeType: file.type },
-  };
 };
 
 
 const VideoTranscriber: React.FC = () => {
-  const [inputType, setInputType] = useState<InputType>('file');
+  const [inputType, setInputType] = useState<InputType>('url');
   const [urlValue, setUrlValue] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [transcript, setTranscript] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [isCopied, setIsCopied] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,38 +44,59 @@ const VideoTranscriber: React.FC = () => {
     setIsLoading(true);
     setTranscript('');
     setError('');
-
-    if (inputType === 'url') {
-      setError('YouTube 連結轉換功能需要後端伺服器支援，目前暫不提供。請使用檔案上傳功能。');
-      setIsLoading(false);
-      return;
-    }
+    setIsCopied(false);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      let response: Response;
 
-      if (file) {
-        const videoPart = await fileToGenerativePart(file);
-        const prompt = "請將這段影片轉為逐字稿。如果可能，請標示出不同的發言者（例如：發言者A、發言者B）。";
-        
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: { parts: [{text: prompt}, videoPart] },
+      if (inputType === 'url') {
+        response = await fetch('/api/transcribe-youtube', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: urlValue }),
         });
-
-        setTranscript(response.text);
+      } else { // 'file' input type
+        if (!file) {
+            throw new Error("請選擇一個檔案。");
+        }
+        // Vercel's Hobby plan has a 4.5MB request body limit. Check on client-side for better UX.
+        if (file.size > 4.5 * 1024 * 1024) {
+            throw new Error("檔案大小超過 4.5MB 限制，無法上傳。");
+        }
+        const fileData = await fileToBase64(file);
+        response = await fetch('/api/transcribe-file', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fileData, mimeType: file.type }),
+        });
       }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || '從伺服器取得逐字稿時發生錯誤。');
+      }
+      setTranscript(data.transcript);
+
     } catch (e) {
       console.error(e);
       const errorMessage = e instanceof Error ? e.message : String(e);
-      if (errorMessage.toLowerCase().includes("api key")) {
-        setError('轉換失敗：API 金鑰無效或未設定。請檢查您在 Vercel 上的環境變數設定。');
+      if (errorMessage.includes('Failed to fetch')) {
+        setError('無法連接到後端服務，請檢查網路連線或稍後再試。');
       } else {
-        setError('轉換失敗，可能影片格式不支援或檔案過大，請稍後再試。');
+        setError(`轉換失敗：${errorMessage}`);
       }
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const handleCopy = () => {
+      if (transcript) {
+          navigator.clipboard.writeText(transcript);
+          setIsCopied(true);
+          setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+      }
   };
 
   const inputTypeButtonClasses = "px-5 py-3 w-full text-center font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2";
@@ -98,6 +109,7 @@ const VideoTranscriber: React.FC = () => {
       setFileName('');
       setTranscript('');
       setError('');
+      setIsCopied(false);
   }
 
   const handleTypeChange = (type: InputType) => {
@@ -140,7 +152,7 @@ const VideoTranscriber: React.FC = () => {
             >
               <UploadIcon className="h-12 w-12 mb-2" />
               <span>{fileName || '點擊以選擇影片或音訊檔案'}</span>
-              <span className="text-xs mt-1">(支援常見影音格式)</span>
+              <span className="text-xs mt-1">(支援常見影音格式，上限 4.5MB)</span>
             </button>
           </div>
         )}
@@ -167,8 +179,21 @@ const VideoTranscriber: React.FC = () => {
 
       {(isLoading || transcript) && (
         <div className="mt-8 bg-gray-800 p-8 rounded-xl shadow-2xl">
-          <h3 className="text-2xl font-bold text-white mb-4">轉換結果</h3>
-          {isLoading && (
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-2xl font-bold text-white">轉換結果</h3>
+            {transcript && (
+              <button
+                onClick={handleCopy}
+                className="bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                aria-label="複製逐字稿"
+              >
+                <CopyIcon className="h-5 w-5" />
+                <span>{isCopied ? '已複製！' : '複製'}</span>
+              </button>
+            )}
+          </div>
+          
+          {isLoading && !transcript && (
               <div className="text-center py-8">
                   <SpinnerIcon className="h-12 w-12 mx-auto text-yellow-400"/>
                   <p className="mt-4 text-gray-400">AI 正在處理您的檔案，請稍候...</p>
@@ -176,7 +201,7 @@ const VideoTranscriber: React.FC = () => {
               </div>
           )}
           {transcript && (
-            <div className="bg-gray-900 p-6 rounded-lg whitespace-pre-wrap text-gray-300 font-mono leading-relaxed max-h-96 overflow-y-auto">
+            <div className="bg-gray-900 p-6 rounded-lg whitespace-pre-wrap text-gray-300 font-mono leading-relaxed max-h-96 overflow-y-auto" role="document" aria-label="影片逐字稿">
               {transcript}
             </div>
           )}
